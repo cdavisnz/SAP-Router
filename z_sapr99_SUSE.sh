@@ -1,11 +1,12 @@
 #!/bin/sh
-# https://github.com/cdavisnz/SAPRouter
+# https://github.com/cdavisnz/saprouter_suse
 # Version:
-#  - 1.0 04/11/2016 #cdavis.nz
+# 1.0 04/11/2016 @cdavis.nz
+# 1.1 28/06/2017 @cdavis.nz Logging Path
 #
 # /etc/init.d/z_sapr99
 # chkconfig: 345 90 10
-# description: Start SAP Router R99
+# description: Start SAProuter R99
 
 ### BEGIN INIT INFO
 # Provides: z_sapr99
@@ -14,8 +15,8 @@
 # Required-Stop:
 # Default-Start: 3 5
 # Default-Stop: 0 1 2 6
-# Short-Description: Start the SAProuter
-# Description: Start the SAProuter
+# Short-Description: Start the SAProuter R99
+# Description: Start the SAProuter R99
 ### END INIT INFO
 
 RETVAL=0
@@ -67,12 +68,13 @@ start()
     if [ -d ${SAPBASE}/exe ]; then
 
         START="-u `id -u ${SAPUSER}` ${SAPEXEC} -r -H ${SAPHOST} -I ${SAPHOST} -S ${SAPPORT} -Z -D -E -J 1048576 -W 60000"
+        LOGGING="-G ${SAPBASE}/log/dev_saprouter -T ${SAPBASE}/log/dev_rout"
 
         case "$SAPSNCP" in
             CN=*)
-            /sbin/startproc ${START} -R ${SAPBASE}/saprouttab -K p:\"$SAPSNCP\" -G ${SAPBASE}/log/dev_saprouter -T ${SAPBASE}/log/dev_rout > ${LOGFILE} 2>&1 &;;
+            /sbin/startproc ${START} -R ${SAPBASE}/saprouttab -K p:\"$SAPSNCP\" ${LOGGING} > ${LOGFILE} 2>&1 &;;
             *)
-            /sbin/startproc ${START} -R ${SAPBASE}/saprouttab -G ${SAPBASE}/log/dev_saprouter -T ${SAPBASE}/log/dev_rout > ${LOGFILE} 2>&1 &;;
+            /sbin/startproc ${START} -R ${SAPBASE}/saprouttab ${LOGGING} > ${LOGFILE} 2>&1 &;;
         esac
 
         sleep 5
@@ -131,15 +133,22 @@ status()
     return ${RETVAL}
 }
 
+upgrade()
+{
+
+}
+
 case $1 in
     stop)
         stop
     ;;
     start)
+        upgrade
         start
     ;;
     restart)
-        stop        
+        stop
+        upgrade
         start
     ;;
     reload)
