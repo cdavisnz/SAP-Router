@@ -133,22 +133,15 @@ status()
     return ${RETVAL}
 }
 
-upgrade()
-{
-
-}
-
 case $1 in
     stop)
         stop
     ;;
     start)
-        upgrade
         start
     ;;
     restart)
-        stop
-        upgrade
+        stop   
         start
     ;;
     reload)
