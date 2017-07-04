@@ -3,7 +3,7 @@
 
 The [SAP Router](https://support.sap.com/en/tools/connectivity-tools/saprouter.html) is an SAP program that acts as an intermediate station (proxy) in a network connection between SAP Systems, or between SAP Systems and external networks. SAP Router controls the access to your network (application level gateway), and, as such, is a useful enhancement to an existing firewall system (port filter).
 
-The following provides my recommended installation process for LINUX and includes an /etc/init.d script.
+The following provides my recommended installation process for LINUX and includes an /etc/init.d scripts. The documentation below is based on SUSE Linux.
  
 # Documentation
 > Installation Guide
@@ -55,7 +55,7 @@ Extract the SAP software for the SAP router and SAP crypto library to the execut
 Download the init.d script `z_sapr99_<os_type>.sh` from this repository.
 ```shell-script
 # cd /etc/init.d
-# wget https://raw.githubusercontent.com/cdavisnz/SAP-Router/master/z_sapr99_SUSE.sh
+# wget https://raw.githubusercontent.com/cdavisnz/SAP-Router/master/z_sapr99_<os_type>.sh
 # mv z_sapr99_SUSE.sh z_sap${_SAPINST,,}
 # chown root:sapsys z_sap${_SAPINST,,}
 # chmod 750 z_sap${_SAPINST,,}
@@ -179,6 +179,10 @@ z_sapr99.service - LSB: Start the SAProuter
            └─79024 /usr/sap/R99/saprouter/exe/saprouter -r -H <HOST> -I <HOST> .... 
 host:r99adm 4>
 ```
+# Amazon Web Services
+> Patching 
+...
+
 > Reference & Supporting Documentation
 
 support.sap.com : Connectivity Tools SAP Router
