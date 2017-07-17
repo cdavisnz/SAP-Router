@@ -1,12 +1,12 @@
-# SAP Router
-> 1. Introduction
+# 1. SAP Router
+> Introduction
 
 The [SAP Router](https://support.sap.com/en/tools/connectivity-tools/saprouter.html) is an SAP program that acts as an intermediate station (proxy) in a network connection between SAP Systems, or between SAP Systems and external networks. SAP Router controls the access to your network (application level gateway), and, as such, is a useful enhancement to an existing firewall system (port filter).
 
 The following provides my recommended installation process for LINUX and includes an /etc/init.d scripts. The documentation below is based on SUSE Linux.
  
-# Documentation
-> 2. Installation Guide
+# 2. Documentation
+> Installation Guide
 ###### 2.1 Parameters:
 The parameter `$_SAPINST` is a temporary variable for the install identifying the system, it just allows us to install multiple sSAP Routers on the one host and gives the appearance that the install looks like a standard SAP application layout. For this example 'R' for router followed by the SAP port number '99' i.e. 3299, i.e. SAP System ID of 'R99'.
 ```shell
@@ -181,8 +181,8 @@ z_sapr99.service - LSB: Start the SAProuter
            └─79024 /usr/sap/R99/saprouter/exe/saprouter -r -H <HOST> -I <HOST> .... 
 host:r99adm 4>
 ```
-# Patching
-> 3. Amazon Web Services 
+# 3. Maintenance
+> Patching within Amazon Web Services 
 
 Our SAP systems running in Amazon Web Services (AWS), hence we synchronised the SAP router binaries off a AWS S3 resource. This allows for patching once and maintain a consistent version across all systems with next to zero effort. We appy this same principle to SAP Kernel, SAP Web Dispatcher, SAP Host Controller, SAP Diagnostics Agent etc. To enable this preform the following steps:
 
