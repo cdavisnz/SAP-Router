@@ -5,7 +5,7 @@
 # 1.1 28/06/2017 @cdavis.nz Logging Path
 # 1.2 08/07/2017 @cdavis.nz Sync from S3
 #
-# /etc/init.d/z_sapr99
+# built on: Linux Amzn1.x86_64
 # chkconfig: 2345 99 01
 # description: SAProuter R99
 
