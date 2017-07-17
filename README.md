@@ -52,11 +52,11 @@ Extract the SAP software for the SAP router and SAP crypto library to the execut
 # chmod -r 755 /usr/sap/${_SAPINST}/
 ```
 ###### 7. Start-up Scripts:
-Download the init.d script `z_sapr99_<os_type>.sh` from this repository.
+Download the init.d script `z_sapr99_<os_type>` from this repository.
 ```shell-script
 # cd /etc/init.d
-# wget https://raw.githubusercontent.com/cdavisnz/SAP-Router/master/z_sapr99_<os_type>.sh
-# mv z_sapr99_SUSE.sh z_sap${_SAPINST,,}
+# wget https://raw.githubusercontent.com/cdavisnz/SAP-Router/master/z_sapr99_<os_type>
+# mv z_sapr99_<os_type> z_sap${_SAPINST,,}
 # chown root:sapsys z_sap${_SAPINST,,}
 # chmod 750 z_sap${_SAPINST,,}
 ```
