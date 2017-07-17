@@ -235,12 +235,14 @@ $ aws s3 ls s3://software-sap/SAPROUTER_LINUX/exe/
 ```
 ###### 3.1 Configuration:
 
-Within the SAP router init.d script, set the paramter 'SAPSYNC' to On and 'AWSREPO' to the S3 resource.
+Within the SAP router init.d script set the parameter `SAPSYNC` equal to 'On' and `AWSREPO` to the S3 resource create above.
 ```
 # cd /etc/init.d
 # vi z_sapr99
 SAPSYNC=On
 AWSREPO=s3://software/SAPROUTER_LINUX/exe
+:wq!
+# systemctl daemon-reload
 ```
 Once done, stop and start the SAP router. The start process will see the current binaries delete then copied back via the '_aws.sh' script. This script also corrects and file permissions and preforms tidy-up operations on logs files etc, amend and expand upon as required.
 
