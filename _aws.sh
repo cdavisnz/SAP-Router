@@ -1,5 +1,5 @@
 #!/bin/sh
-# https://github.com/cdavisnz/saprouter_suse
+# https://github.com/cdavisnz/SAP-Router
 # Version:
 # 1.0 04/11/2016 @cdavis.nz
 # 1.1 28/06/2017 @cdavis.nz Logging Path
