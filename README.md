@@ -1,59 +1,59 @@
 # SAP Router
-> Introduction
+> 1. Introduction
 
 The [SAP Router](https://support.sap.com/en/tools/connectivity-tools/saprouter.html) is an SAP program that acts as an intermediate station (proxy) in a network connection between SAP Systems, or between SAP Systems and external networks. SAP Router controls the access to your network (application level gateway), and, as such, is a useful enhancement to an existing firewall system (port filter).
 
 The following provides my recommended installation process for LINUX and includes an /etc/init.d scripts. The documentation below is based on SUSE Linux.
  
 # Documentation
-> Installation Guide
-###### 1. Parameters:
+> 2. Installation Guide
+###### 2.1 Parameters:
 The parameter `$_SAPINST` is a temporary variable for the install identifying the system, it just allows us to install multiple sSAP Routers on the one host and gives the appearance that the install looks like a standard SAP application layout. For this example 'R' for router followed by the SAP port number '99' i.e. 3299, i.e. SAP System ID of 'R99'.
 ```shell
 # sudo su - root
 # bash
 # _SAPINST=R99; export SAPINST
 ```
-###### 2. User Account:
+###### 2.2 User Account:
 Create the \<sapsid\>adm user account and group that the SAP router process will run under, provide the groupid \<GID\> and userid \<UID\> as required.
-```shell-script
+```
 # groupadd -g <GID> sapsys
 # useradd -u <UID> -g sapsys -c "SAP Router" ${_SAPINST,,}adm -m -s /bin/csh
 # passwd ${_SAPINST,,}adm
 ```
-###### 3. Software:
+###### 2.3 Software:
 Ensure the SAPCAR executable is downloaded and available for use.
-```shell-script
+```
 # cp SAPCAR_<VERSION>.EXE /usr/sbin/SAPCAR
 # chown root:sapsys /usr/sbin/SAPCAR
 # chmod 755 /usr/sbin/SAPCAR
 ```
-###### 4. Direcorties:
+###### 2.4 Direcorties:
 Create the following direcorty structure for the SAP router installation.
-```shell-script
+```
 # mkdir -p /usr/sap/${_SAPINST}/saprouter/exe
 # mkdir /usr/sap/${_SAPINST}/saprouter/tmp
 # mkdir /usr/sap/${_SAPINST}/saprouter/sec
 # mkdir /usr/sap/${_SAPINST}/saprouter/log
 ```
-###### 5. Permission Tables:
+###### 2.5 Permission Tables:
 The following just creates a sample 'saprouttab' file with all connections denied. The SAP router needs this file to start, please amended as per your own requirements [Route Permission Table](https://uacp2.hana.ondemand.com/viewer/e245703406684d8a81812f4c6334eb2f/7.51.0/en-US/486c7a3fc1504e6ce10000000a421937.html).
-```shell-script
+```
 # echo "D * * *" > /usr/sap/${_SAPINST}/saprouter/saprouttab
 # chmod 600 /usr/sap/${_SAPINST}/saprouter/saprouttab
 ```
-###### 6. Software:
+###### 2.6 Software:
 Extract the SAP software for the SAP router and SAP crypto library to the executable directory.
-```shell-script
+```
 # SAPCAR -xvf saprouter_<VERSION>.SAR -R /usr/sap/${_SAPINST}/saprouter/exe/
 # SAPCAR -xvf SAPCRYPTOLIBP_<VERSION>.SAR -R /usr/sap/${_SAPINST}/saprouter/exe/
 # chown root:sapsys /usr/sap/
 # chown -R ${_SAPINST,,}adm:sapsys /usr/sap/${_SAPINST}/
 # chmod -r 755 /usr/sap/${_SAPINST}/
 ```
-###### 7. Start-up Scripts:
+###### 2.7 Start-up Scripts:
 Download the init.d script `z_sapr99_<os_type>` from this repository.
-```shell-script
+```
 # cd /etc/init.d
 # wget https://raw.githubusercontent.com/cdavisnz/SAP-Router/master/z_sapr99_<os_type>
 # mv z_sapr99_<os_type> z_sap${_SAPINST,,}
@@ -61,7 +61,7 @@ Download the init.d script `z_sapr99_<os_type>` from this repository.
 # chmod 750 z_sap${_SAPINST,,}
 ```
 Adjust the values for `$SAPSYSTEMNAME`, `$SAPUSER`, and `$SAPPORT` as required. If your SAP router is to be SNC enabled, please provide the Common Name within the parameter `SAPSNCP` i.e. SAPSNCP="CN=\<Name\>, OU=\<Customer Number\>, OU=SAProuter, O=SAP, C=DE". To disable, leave the parameter as is.  
-```shell-script
+```
 # vi  z_sap${_SAPINST,,}
 :set fileformat=unix
 ...
@@ -71,6 +71,8 @@ SAPBASE=/usr/sap/${SAPSYSTEMNAME}/saprouter
 SAPEXEC=${SAPBASE}/exe/saprouter
 SAPHOST=`hostname --ip-address`
 SAPPORT=3299
+SAPSYNC=Off
+AWSREPO=s3://software/SAPROUTER_LINUX/exe
 
 SECUDIR=${SAPBASE}/sec; export SECUDIR
 SNC_LIB=${SAPBASE}/exe/libsapcrypto.so; export SNC_LIB
@@ -79,12 +81,12 @@ SAPSNCP=""
 :wq!
 ```
 Add and enable the script to execute on start-up.
-```shell-script
+```
 # systemctl daemon-reload
 # chkconfig -a z_sap${_SAPINST,,}
 # chkconfig z_sap${_SAPINST,,} on
 ```
-###### 8. Access:
+###### 2.8 Access:
 Via sudo allow the \<sapsid\>adm rights to access the init.d script, edit the sudoers.d file as required.
 ```shell-script
 # visudo
@@ -98,13 +100,13 @@ r99adm ALL = (root) NOPASSWD: /bin/systemctl stop z_sapr99
 r99adm ALL = (root) NOPASSWD: /bin/systemctl status z_sapr99
 r99adm ALL = (root) NOPASSWD: /bin/systemctl reload z_sapr99
 ```
-###### 9. Environment:
+###### 2.9 Environment:
 Create the follow user environment for the SAP router \<sapsid\>adm account.
-```shell-script
+```
 # vi /home/${_SAPINST,,}adm/.cshrc
 ```
 Copy in the following content and save the file, modify if required to reflect the correct SAP System ID.
-```shell-script
+```
 # @(#) $Id: //bas/721_REL/src/krn/tpls/ind/SAPSRC.CSH#1 $ SAP
 # systename
 setenv SAPSYSTEMNAME R99
@@ -136,7 +138,7 @@ alias reloadsap 'sudo /bin/systemctl reload z_sapr99'
 # chown ${_SAPINST,,}adm:sapsys /home/${_SAPINST,,}adm/.cshrc
 # chmod 640 /home/${_SAPINST,,}adm/.cshrc
 ```
-###### 10. Certificate (Optional):
+###### 2.10 Certificate (Optional):
 If Secure Network Communications (SNC) is required, generate the required certificate. The common name is your own, if it is a SNC connection to SAP then it is the value issued by SAP. For more information of this visit the SAP support link below for Connectivity Tools SAP Router.
 ```shell-script
 # sudo su - ${_SAPINST,,}adm
@@ -152,7 +154,7 @@ The following command imports the 'reponse.crt' file from a Certificate Authorit
 host:r99adm 7> sapgenpse import_own_cert -c reponse.crt -p ${_SAPINST}SSLS.pse
 host:r99adm 8> sapgenpse get_my_name -p ${_SAPINST}SSLS.pse
 ```
-###### 11. Commands:
+###### 2.11 Commands:
 As root, the SAP Router can be stopped via the init.d, systemctl commands i.e. 
 ```shell-script
 # sudo su - 
@@ -180,15 +182,23 @@ z_sapr99.service - LSB: Start the SAProuter
 host:r99adm 4>
 ```
 # Patching
-> Amazon Web Services 
+> 3. Amazon Web Services 
 
-With our SAP systems running in Amazon Web Services (AWS), we synchronised the SAP router binaries off a S3 resource. This allows us to patch once and maintain a consistent version with zero effort.
+Our SAP systems running in Amazon Web Services (AWS), hence we synchronised the SAP router binaries off a AWS S3 resource. This allows for patching once and maintain a consistent version across all systems with next to zero effort. We appy this same principle to SAP Kernel, SAP Web Dispatcher, SAP Host Controller, SAP Diagnostics Agent etc. To enable this preform the following steps:
 
-With AWS create a S3 bucket, i.e. s3://software-sap/SAPROUTER_LINUX/exe and upload the extract files from saprouter_<VERSION>.SAR 
-and SAPCRYPTOLIBP_<VERSION>.SAR. In addtion to this upload the github script '_aws.sh'and create a file name '.upgrading' within. 
+###### 3.1 S3 Resource:
 
+Within AWS create a S3 bucket, i.e. s3://software-sap/SAPROUTER_LINUX/exe and upload the extract files from saprouter_<VERSION>.SAR 
+and SAPCRYPTOLIBP_<VERSION>.SAR. In addtion to this upload the github script '_aws.sh'and create a file name '.upgrading'.
+
+In addition to to this ensure that the EC2 instance running the SAP router has the AWS Command Line Interface (CLI) installed.
+```
+# aws --version
+aws-cli/1.10.38 Python/2.7.9 Linux/3.12.60-52.54-default botocore/1.4.28
+```
+###### 3.1 IAM Policy:
 Ensure that the EC2 instance running the SAP router can access the S3 bucket, example policy below.
-```json
+```
 {
     "Version": "2012-10-17",
     "Statement": [
@@ -207,7 +217,7 @@ Ensure that the EC2 instance running the SAP router can access the S3 bucket, ex
 }
 ```
 Once done you should be able to list the bucket as follows.
-```shell-script
+```
 $ aws s3 ls s3://software-sap/SAPROUTER_LINUX/exe/
 2016-06-30 07:15:51          0
 2017-07-04 07:38:13          0 .upgrading
@@ -223,15 +233,31 @@ $ aws s3 ls s3://software-sap/SAPROUTER_LINUX/exe/
 2017-06-30 07:46:12      38003 sapgenpse
 2017-07-15 09:12:08    1826976 saprouter
 ```
-> Reference & Supporting Documentation
+###### 3.1 Configuration:
 
-support.sap.com : Connectivity Tools SAP Router
+Within the SAP router init.d script, set the paramter 'SAPSYNC' to On and 'AWSREPO' to the S3 resource.
+```
+# cd /etc/init.d
+# vi z_sapr99
+SAPSYNC=On
+AWSREPO=s3://software/SAPROUTER_LINUX/exe
+```
+Once done, stop and start the SAP router. The start process will see the current binaries delete then copied back via the '_aws.sh' script. This script also corrects and file permissions and preforms tidy-up operations on logs files etc, amend and expand upon as required.
+
+# 4. References
+> Supporting Documentation
+
+###### 4.1 SAP Help:
+
+Connectivity Tools SAP Router
 \- https://support.sap.com/en/tools/connectivity-tools/saprouter.html
 
-sap.help.com : SAP Router
+SAP Router
 \- https://uacp2.hana.ondemand.com/viewer/e245703406684d8a81812f4c6334eb2f/7.51.0/en-US/487612ed5ca5055ee10000000a42189b.html
 
-suse.com : SAProuter Integration
+###### 4.2 SUSE Linux:
+
+SAProuter Integration
 SUSE Linux Enterprise Server for SAP Applications 12 SP2
 \- https://www.suse.com/documentation/sles-for-sap-12/singlehtml/book_s4s/book_s4s.html#sec.s4s.configure.saprouter
 
