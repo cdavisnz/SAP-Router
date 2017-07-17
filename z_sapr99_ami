@@ -1,0 +1,191 @@
+#!/bin/sh
+# https://github.com/cdavisnz/SAP-Router
+# Version:
+# 1.0 04/11/2016 @cdavis.nz
+# 1.1 28/06/2017 @cdavis.nz Logging Path
+# 1.2 08/07/2017 @cdavis.nz Sync from S3
+#
+# /etc/init.d/z_sapr99
+# chkconfig: 2345 99 01
+# description: SAProuter R99
+
+### BEGIN INIT INFO
+# Provides: z_sapr90
+# Required-Start: $network $syslog $remote_fs $time
+# X-UnitedLinux-Should-Start:
+# Required-Stop:
+# Default-Start: 3 5
+# Default-Stop: 0 1 2 6
+# Short-Description: SAProuter R99
+# Description: SAProuter R99
+### END INIT INFO
+
+RETVAL=0
+
+# Source function library.
+. /etc/init.d/functions
+
+SAPSYSTEMNAME=R99
+SAPUSER=r99adm
+SAPBASE=/usr/sap/${SAPSYSTEMNAME}/saprouter
+SAPEXEC=${SAPBASE}/exe/saprouter
+SAPLOGS=${SAPBASE}/log
+SAPHOST=`hostname --ip-address`
+SAPPORT=3299
+SAPSYNC=Off
+AWSREPO=s3://software-sap/SAPROUTER_LINUX/exe
+
+SECUDIR=${SAPBASE}/sec; export SECUDIR
+SNC_LIB=${SAPBASE}/exe/libsapcrypto.so; export SNC_LIB
+SAPSNCP=""
+
+LOCKFILE=${SAPBASE}/tmp/sap${SAPUSER}-`whoami`.tmp
+LOGFILE=${SAPBASE}/tmp/saprouter-`whoami`.log
+PATH=${PATH}:$SAPBASE/exe; export PATH
+LIBPATH=$SAPBASE/exe; export LIBPATH
+
+check()
+{
+    pgrep -f "${SAPEXEC}" > /dev/null
+    RETVAL=$?
+    return ${RETVAL}
+}
+
+stop()
+{
+    echo -n $"Shutdown SAP Router ${SAPSYSTEMNAME}: "
+
+    check
+
+    if [ -d ${SAPBASE}/exe ] && [ ${RETVAL} -eq 0 ]; then
+        daemon --user "${SAPUSER}" "${SAPEXEC} -s -H ${SAPHOST} -S ${SAPPORT}" > ${LOGFILE} 2>&1
+        RETVAL=$?
+    else
+        RETVAL=1
+    fi
+
+    if [ ${RETVAL} -eq 0 ]; then
+       rm -f ${LOCKFILE}
+       success
+    else
+       failure
+    fi
+    echo
+    return ${RETVAL}
+}
+
+start()
+{
+    echo -n $"Startup SAP Router ${SAPSYSTEMNAME}: "
+
+    check
+
+    if [ -d ${SAPBASE}/exe ] && [ -x "/usr/bin/aws" ] && [ ${SAPSYNC} == "On" ] && [ ${RETVAL} -ne 0 ]; then
+
+        /usr/bin/aws s3 cp ${AWSREPO}/_aws.sh ${SAPBASE}/exe --quiet
+
+        if [ -f ${SAPBASE}/exe/_aws.sh ]; then
+            chmod -f 700 root:sapsys ${SAPBASE}/exe/_aws.sh
+            chown root:sapsys ${SAPBASE}/exe/_aws.sh
+            ${SAPBASE}/exe/_aws.sh ${SAPSYSTEMNAME} ${SAPBASE} ${SAPUSER} ${AWSREPO}
+            rm -f ${SAPBASE}/exe/_aws.sh
+        fi
+    fi
+
+    if [ -d ${SAPBASE}/exe ] && [ ${RETVAL} -ne 0 ]; then
+
+        START="--user ${SAPUSER} ${SAPEXEC} -r -H ${SAPHOST} -I ${SAPHOST} -S ${SAPPORT} -Z -D -E -J 1048576 -W 60000"
+        LOGGING="-G ${SAPBASE}/log/dev_saprouter -T ${SAPBASE}/log/dev_rout"
+
+        case "$SAPSNCP" in
+            CN=*)
+            daemon ${START} -R ${SAPBASE}/saprouttab -K p:\"$SAPSNCP\" ${LOGGING} > ${LOGFILE} 2>&1 &;;
+            *)
+            daemon ${START} -R ${SAPBASE}/saprouttab ${LOGGING} > ${LOGFILE} 2>&1 &;;
+        esac
+
+        sleep 2
+        check
+    else
+        RETVAL=1
+    fi
+
+    if [ ${RETVAL} -eq 0 ]; then
+        touch ${LOCKFILE}
+        success
+    else
+        failure
+    fi
+    echo
+    return ${RETVAL}
+}
+
+reload()
+{
+    echo -n $"Reload SAP Router ${SAPSYSTEMNAME}: "
+
+    check
+
+    if [ -d ${SAPBASE}/exe ] && [ ${RETVAL} -eq 0 ]; then
+        ${SAPEXEC} -n -H ${SAPHOST} -S ${SAPPORT} -R ${SAPBASE}/saprouttab > ${LOGFILE} 2>&1
+        RETVAL=$?
+    else
+        RETVAL=1
+    fi
+
+    if [ ${RETVAL} -eq 0 ]; then
+        touch ${LOCKFILE}
+        success
+    else
+        failure
+    fi
+    echo
+    return ${RETVAL}
+}
+
+status()
+{
+    echo -n $"Status SAP Router ${SAPSYSTEMNAME}: "
+
+    check
+
+    if [ -d ${SAPBASE}/exe ] && [ ${RETVAL} -eq 0 ]; then
+        ${SAPEXEC} -l -H ${SAPHOST} -S ${SAPPORT} > ${LOGFILE} 2>&1
+        RETVAL=$?
+    else
+        RETVAL=1
+    fi
+
+    if [ ${RETVAL} -eq 0 ]; then
+        touch ${LOCKFILE}
+        success
+    else
+        failure
+    fi
+    echo
+    return ${RETVAL}
+}
+
+case $1 in
+    stop)
+        stop
+    ;;
+    start)
+       start
+    ;;
+    restart)
+       stop
+       start
+    ;;
+    reload)
+       reload
+    ;;
+    status)
+       status
+    ;;
+    *)
+       echo "Usage $0 (start|stop|restart|reload|status)"
+       exit 1;
+    ;;
+esac
+exit ${RETVAL}
