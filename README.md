@@ -88,7 +88,7 @@ Add and enable the script to execute on start-up.
 ```
 ###### 2.8 Access:
 Via sudo allow the \<sapsid\>adm rights to access the init.d script, edit the sudoers.d file as required.
-```shell-script
+```
 # visudo
 ```
 Add the following content and save the file , modify if required to reflect the correct SAP System ID.
@@ -134,13 +134,13 @@ alias stopsap 'sudo /bin/systemctl stop z_sapr99'
 alias statussap 'sudo /bin/systemctl status z_sapr99'
 alias reloadsap 'sudo /bin/systemctl reload z_sapr99'
 ```
-```shell-script
+```
 # chown ${_SAPINST,,}adm:sapsys /home/${_SAPINST,,}adm/.cshrc
 # chmod 640 /home/${_SAPINST,,}adm/.cshrc
 ```
 ###### 2.10 Certificate (Optional):
 If Secure Network Communications (SNC) is required, generate the required certificate. The common name is your own, if it is a SNC connection to SAP then it is the value issued by SAP. For more information of this visit the SAP support link below for Connectivity Tools SAP Router.
-```shell-script
+```
 # sudo su - ${_SAPINST,,}adm
 host:r99adm 1> setenv _SAPINST=R99
 host:r99adm 2> cd /usr/sap/${_SAPINST}/saprouter/sec
@@ -150,13 +150,13 @@ host:r99adm 5> sapgenpse seclogin -p ${_SAPINST}SSLS.pse -O ${_SAPINST,,}adm
 host:r99adm 6> chmod 600 ${_SAPINST}SSLS.pse cred_v2
 ```
 The following command imports the 'reponse.crt' file from a Certificate Authority, in this case SAP SE.
-```shell-script
+```
 host:r99adm 7> sapgenpse import_own_cert -c reponse.crt -p ${_SAPINST}SSLS.pse
 host:r99adm 8> sapgenpse get_my_name -p ${_SAPINST}SSLS.pse
 ```
 ###### 2.11 Commands:
 As root, the SAP Router can be stopped via the init.d, systemctl commands i.e. 
-```shell-script
+```
 # sudo su - 
 # cd /etc/init.d
 # ./z_sapr99 start
@@ -168,7 +168,7 @@ redirecting to systemctl stop .service
 Shutdown SAPRouter R99:                                               done
 ```
 As \<sapsid\>adm, stopping and starting the SAP router can be done via the predefined alias's. i.e. stopsap. Updates to saprouttab can be activated via the reloadsap command.
-```shell-script
+```
 # sudo su - r99adm
 host:r99adm 1> stopsap
 host:r99adm 2> startsap
