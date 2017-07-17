@@ -179,10 +179,52 @@ z_sapr99.service - LSB: Start the SAProuter
            └─79024 /usr/sap/R99/saprouter/exe/saprouter -r -H <HOST> -I <HOST> .... 
 host:r99adm 4>
 ```
-# Amazon Web Services
-> Patching 
-...
+# Patching
+> Amazon Web Services 
+With our SAP systems running in Amazon Web Services (AWS), we synchronised the SAP router binaries off a S3 resource. This allows us to patch once and maintain a consistent version with zero effort.
 
+With AWS create a S3 bucket, i.e. s3://software-sap/SAPROUTER_LINUX/exe and upload the extract files from saprouter_<VERSION>.SAR 
+and SAPCRYPTOLIBP_<VERSION>.SAR. In addtion to this upload the github script '_aws.sh'and create a file name '.upgrading' within. 
+```shell-script
+
+
+```
+Ensure that the EC2 instance running the SAP router can access the S3 bucket, example policy below.
+```json
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:Get*",
+                "s3:List*"
+            ],
+            "Resource": [
+                "arn:aws:s3:::software-sap",
+                "arn:aws:s3:::software-sap/*"
+            ]
+        }
+    ]
+}
+```
+Once done you should be able to list the bucket as follows
+```shell-script
+$ aws s3 ls s3://software-sap/SAPROUTER_LINUX/exe/
+2016-06-30 07:15:51          0
+2017-07-04 07:38:13          0 .upgrading
+2016-07-24 09:27:42       5290 SIGNATURE.SMF
+2017-07-15 09:12:09       2894 _aws.sh
+2017-06-30 07:46:12    5861546 libsapcrypto.so
+2016-07-24 09:27:42     499679 libslcryptokernel.so
+2017-06-30 07:46:12        166 libslcryptokernel.so.sha256
+2017-07-15 09:12:09    1402645 niping
+2017-07-15 09:12:08        303 patches.mf
+2017-06-30 07:46:11        102 sapcrypto.lst
+2017-06-30 07:46:12        257 sapcrypto.mf
+2017-06-30 07:46:12      38003 sapgenpse
+2017-07-15 09:12:08    1826976 saprouter
+```
 > Reference & Supporting Documentation
 
 support.sap.com : Connectivity Tools SAP Router
