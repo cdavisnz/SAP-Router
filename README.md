@@ -181,14 +181,12 @@ host:r99adm 4>
 ```
 # Patching
 > Amazon Web Services 
+
 With our SAP systems running in Amazon Web Services (AWS), we synchronised the SAP router binaries off a S3 resource. This allows us to patch once and maintain a consistent version with zero effort.
 
 With AWS create a S3 bucket, i.e. s3://software-sap/SAPROUTER_LINUX/exe and upload the extract files from saprouter_<VERSION>.SAR 
 and SAPCRYPTOLIBP_<VERSION>.SAR. In addtion to this upload the github script '_aws.sh'and create a file name '.upgrading' within. 
-```shell-script
 
-
-```
 Ensure that the EC2 instance running the SAP router can access the S3 bucket, example policy below.
 ```json
 {
@@ -208,7 +206,7 @@ Ensure that the EC2 instance running the SAP router can access the S3 bucket, ex
     ]
 }
 ```
-Once done you should be able to list the bucket as follows
+Once done you should be able to list the bucket as follows.
 ```shell-script
 $ aws s3 ls s3://software-sap/SAPROUTER_LINUX/exe/
 2016-06-30 07:15:51          0
