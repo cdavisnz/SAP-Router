@@ -189,7 +189,7 @@ Our SAP systems running in Amazon Web Services (AWS), hence we synchronised the 
 ###### 3.1 S3 Resource:
 
 Within AWS create a S3 bucket, i.e. s3://software-sap/SAPROUTER_LINUX/exe and upload the extract files from saprouter_<VERSION>.SAR 
-and SAPCRYPTOLIBP_<VERSION>.SAR. In addtion to this upload the github script '_aws.sh'and create a file name '.upgrading'.
+and SAPCRYPTOLIBP_<VERSION>.SAR. In addtion to this upload the github script `_aws.sh`and create a file name `.upgrading`.
 
 In addition to to this ensure that the EC2 instance running the SAP router has the AWS Command Line Interface (CLI) installed.
 ```
