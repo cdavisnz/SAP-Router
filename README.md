@@ -242,7 +242,7 @@ Within the SAP router init.d script set the parameter `SAPSYNC` equal to 'On' an
 # cd /etc/init.d
 # vi z_sapr99
 SAPSYNC=On
-AWSREPO=s3://software/SAPROUTER_LINUX/exe
+AWSREPO=s3://software-sap/SAPROUTER_LINUX/exe
 :wq!
 # systemctl daemon-reload
 ```
