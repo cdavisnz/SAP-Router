@@ -74,7 +74,7 @@ SAPEXEC=${SAPBASE}/exe/saprouter
 SAPHOST=`hostname --ip-address`
 SAPPORT=3299
 SAPSYNC=Off
-AWSREPO=s3://software/SAPROUTER_LINUX/exe
+AWSREPO=s3://software-sap/SAPROUTER_LINUX/exe
 
 SECUDIR=${SAPBASE}/sec; export SECUDIR
 SNC_LIB=${SAPBASE}/exe/libsapcrypto.so; export SNC_LIB
