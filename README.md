@@ -84,9 +84,9 @@ SAPSNCP=""
 ```
 Add and enable the script to execute on start-up.
 ```
-# systemctl daemon-reload
 # chkconfig -a z_sap${_SAPINST,,}
 # chkconfig z_sap${_SAPINST,,} on
+# systemctl daemon-reload
 ```
 ###### 2.8 Access:
 Via sudo allow the \<sapsid\>adm rights to access the init.d script, edit the sudoers.d file as required.
