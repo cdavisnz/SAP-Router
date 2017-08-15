@@ -51,7 +51,7 @@ Extract the SAP software for the SAProuter and SAP crypto library to the executa
 # SAPCAR -xvf SAPCRYPTOLIBP_<VERSION>.SAR -R /usr/sap/${_SAPINST}/saprouter/exe/
 # chown root:sapsys /usr/sap/
 # chown -R ${_SAPINST,,}adm:sapsys /usr/sap/${_SAPINST}/
-# chmod -r 755 /usr/sap/${_SAPINST}/
+# chmod -R 755 /usr/sap/${_SAPINST}/
 ```
 ###### 2.7 Start-up Scripts:
 Download the init.d script `z_sapr99_<os_type>` from this repository.
