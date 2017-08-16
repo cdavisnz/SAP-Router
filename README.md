@@ -144,17 +144,18 @@ alias reloadsap 'sudo /bin/systemctl reload z_sapr99'
 If Secure Network Communications (SNC) is required, generate the required certificate. The common name is your own, if it is a SNC connection to SAP then it is the value issued by SAP. For more information of this visit the SAP support link below for Connectivity Tools SAP Router.
 ```
 # sudo su - ${_SAPINST,,}adm
-host:r99adm 1> setenv _SAPINST=R99
-host:r99adm 2> cd /usr/sap/${_SAPINST}/saprouter/sec
-host:r99adm 3> setenv SECUDIR /usr/sap/${_SAPINST}/saprouter/sec
-host:r99adm 4> sapgenpse get_pse -v -a sha256WithRsaEncryption -s 2048 -r certreq -p ${_SAPINST}SSLS.pse "CN=...,"
-host:r99adm 5> sapgenpse seclogin -p ${_SAPINST}SSLS.pse -O ${_SAPINST,,}adm
-host:r99adm 6> chmod 600 ${_SAPINST}SSLS.pse cred_v2
+host:r99adm 1> bash
+host:r99adm 2> setenv _SAPINST R99
+host:r99adm 3> cd /usr/sap/${_SAPINST}/saprouter/sec
+host:r99adm 4> setenv SECUDIR /usr/sap/${_SAPINST}/saprouter/sec
+host:r99adm 5> sapgenpse get_pse -v -a sha256WithRsaEncryption -s 2048 -r certreq -p ${_SAPINST}SSLS.pse "CN=...,"
+host:r99adm 6> sapgenpse seclogin -p ${_SAPINST}SSLS.pse -O ${_SAPINST,,}adm
+host:r99adm 7> chmod 600 ${_SAPINST}SSLS.pse cred_v2
 ```
 The following command imports the 'reponse.crt' file from a Certificate Authority, in this case SAP SE.
 ```
-host:r99adm 7> sapgenpse import_own_cert -c reponse.crt -p ${_SAPINST}SSLS.pse
-host:r99adm 8> sapgenpse get_my_name -p ${_SAPINST}SSLS.pse
+host:r99adm 8> sapgenpse import_own_cert -c reponse.crt -p ${_SAPINST}SSLS.pse
+host:r99adm 9> sapgenpse get_my_name -p ${_SAPINST}SSLS.pse
 ```
 ###### 2.11 Commands:
 As root, the SAP Router can be stopped via the init.d, systemctl commands i.e. 
