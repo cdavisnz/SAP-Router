@@ -145,7 +145,7 @@ If Secure Network Communications (SNC) is required, generate the required certif
 ```
 # sudo su - ${_SAPINST,,}adm
 host:r99adm 1> bash
-host:r99adm 2> setenv _SAPINST R99
+host:r99adm 2> _SAPINST=R99; export SAPINST
 host:r99adm 3> cd /usr/sap/${_SAPINST}/saprouter/sec
 host:r99adm 4> setenv SECUDIR /usr/sap/${_SAPINST}/saprouter/sec
 host:r99adm 5> sapgenpse get_pse -v -a sha256WithRsaEncryption -s 2048 -r certreq -p ${_SAPINST}SSLS.pse "CN=...,"
