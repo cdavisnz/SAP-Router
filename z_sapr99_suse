@@ -1,13 +1,14 @@
 #!/bin/sh
-# https://github.com/cdavisnz/saprouter_suse
+# https://github.com/cdavisnz/SAP-Router
 # Version:
 # 1.0 04/11/2016 @cdavis.nz
 # 1.1 28/06/2017 @cdavis.nz Logging Path
 # 1.2 08/07/2017 @cdavis.nz Sync from S3
+# 1.3 16/08/2017 @cdavis.nz Parameter for SNC partner
 #
 # built on: Linux SuSE12.0.x86_64
 # chkconfig: 345 90 10
-# description: Start SAProuter R99
+# description: SAProuter R99
 
 ### BEGIN INIT INFO
 # Provides: z_sapr99
@@ -33,7 +34,7 @@ SAPEXEC=${SAPBASE}/exe/saprouter
 SAPHOST=`hostname --ip-address`
 SAPPORT=3299
 SAPSYNC=Off
-AWSREPO=s3://software/SAPROUTER_LINUX/exe
+AWSREPO=s3://software-sap/SAPROUTER_LINUX/exe
 
 SECUDIR=${SAPBASE}/sec; export SECUDIR
 SNC_LIB=${SAPBASE}/exe/libsapcrypto.so; export SNC_LIB
@@ -96,9 +97,9 @@ start()
         START="-u `id -u ${SAPUSER}` ${SAPEXEC} -r -H ${SAPHOST} -I ${SAPHOST} -S ${SAPPORT} -Z -D -E -J 1048576 -W 60000"
         LOGGING="-G ${SAPBASE}/log/dev_saprouter -T ${SAPBASE}/log/dev_rout"
 
-        case "$SAPSNCP" in
+        case "${SAPSNCP}" in
             CN=*)
-            /sbin/startproc ${START} -R ${SAPBASE}/saprouttab -K p:\"$SAPSNCP\" ${LOGGING} > ${LOGFILE} 2>&1 &;;
+            /sbin/startproc ${START} -R ${SAPBASE}/saprouttab -K p:"${SAPSNCP}" ${LOGGING} > ${LOGFILE} 2>&1 &;;
             *)
             /sbin/startproc ${START} -R ${SAPBASE}/saprouttab ${LOGGING} > ${LOGFILE} 2>&1 &;;
         esac
