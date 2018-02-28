@@ -5,6 +5,7 @@
 # 1.1 28/06/2017 @cdavis.nz Logging Path
 # 1.2 08/07/2017 @cdavis.nz Sync from S3
 # 1.3 16/08/2017 @cdavis.nz Parameter for SNC partner
+# 1.4 28/02/2018 A Bonnefoy : Modification for an already existing SAP instance on server.
 #
 # built on: Linux SuSE12.0.x86_64
 # chkconfig: 345 90 10
@@ -29,21 +30,22 @@ rc_reset
 
 SAPSYSTEMNAME=R99
 SAPUSER=r99adm
-SAPBASE=/usr/sap/${SAPSYSTEMNAME}/saprouter
-SAPEXEC=${SAPBASE}/exe/saprouter
+SAPBASE=/usr/sap/saprouter
+SAPEXE=/usr/sap/${SAPSYSTEMNAME}/SYS/exe/run
+SAPEXEC=${SAPEXE}/saprouter
 SAPHOST=`hostname --ip-address`
 SAPPORT=3299
 SAPSYNC=Off
 AWSREPO=s3://software-sap/SAPROUTER_LINUX/exe
 
 SECUDIR=${SAPBASE}/sec; export SECUDIR
-SNC_LIB=${SAPBASE}/exe/libsapcrypto.so; export SNC_LIB
+SNC_LIB=${SAPEXE}/libsapcrypto.so; export SNC_LIB
 SAPSNCP=""
 
 LOCKFILE=${SAPBASE}/tmp/sap${SAPUSER}-`whoami`.tmp
 LOGFILE=${SAPBASE}/tmp/saprouter-`whoami`.log
-PATH=${PATH}:$SAPBASE/exe; export PATH
-LIBPATH=$SAPBASE/exe; export LIBPATH
+PATH=${PATH}:$SAPEXE; export PATH
+LD_LIBRARY_PATH=$SAPEXE; export LD_LIBRARY_PATH
 
 check()
 {
@@ -58,7 +60,7 @@ stop()
 
     check
 
-    if [ -d ${SAPBASE}/exe ] && [ ${RETVAL} -eq 0 ]; then
+    if [ -d ${SAPBASE} ] && [ ${RETVAL} -eq 0 ]; then
         ${SAPEXEC} -s -H ${SAPHOST} -S ${SAPPORT} > ${LOGFILE} 2>&1
         RETVAL=$?
     else
@@ -80,7 +82,7 @@ start()
 
     check
 
-    if [ -d ${SAPBASE}/exe ] && [ -x "/usr/bin/aws" ] && [ ${SAPSYNC} == "On" ] && [ ${RETVAL} -ne 0 ]; then
+    if [ -d ${SAPBASE} ] && [ -x "/usr/bin/aws" ] && [ ${SAPSYNC} == "On" ] && [ ${RETVAL} -ne 0 ]; then
 
         /usr/bin/aws s3 cp ${AWSREPO}/_aws.sh ${SAPBASE}/exe --quiet
 
@@ -92,9 +94,9 @@ start()
         fi
     fi
 
-    if [ -d ${SAPBASE}/exe ] && [ ${RETVAL} -ne 0 ]; then
+    if [ -d ${SAPBASE} ] && [ ${RETVAL} -ne 0 ]; then
 
-        START="-u `id -u ${SAPUSER}` ${SAPEXEC} -r -H ${SAPHOST} -I ${SAPHOST} -S ${SAPPORT} -Z -D -E -J 1048576 -W 60000"
+        START="-u `id -u ${SAPUSER}` ${SAPEXEC} -r -H ${SAPHOST} -I ${SAPHOST} -S ${SAPPORT} -E -J 1048576 -W 60000"
         LOGGING="-G ${SAPBASE}/log/dev_saprouter -T ${SAPBASE}/log/dev_rout"
 
         case "${SAPSNCP}" in
@@ -125,7 +127,7 @@ reload()
 
     check
 
-    if [ -d ${SAPBASE}/exe ] && [ ${RETVAL} -eq 0 ]; then
+    if [ -d ${SAPBASE} ] && [ ${RETVAL} -eq 0 ]; then
         ${SAPEXEC} -n -H ${SAPHOST} -S ${SAPPORT} > ${LOGFILE} 2>&1
         RETVAL=$?
     else
@@ -147,7 +149,7 @@ status()
 
     check
 
-    if [ -d ${SAPBASE}/exe ] && [ ${RETVAL} -eq 0 ]; then
+    if [ -d ${SAPBASE} ] && [ ${RETVAL} -eq 0 ]; then
         ${SAPEXEC} -l -H ${SAPHOST} -S ${SAPPORT} > ${LOGFILE} 2>&1
         RETVAL=$?
     else
